@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinityloop - Cosmic Collector</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero">
+        <div class="stars"></div>
+        <div class="shooting-stars"></div>
+        <div class="nebula"></div>
+        <div class="cosmic-grid"></div>
+        
+        <nav>
+            <div class="logo">
+                <div class="orbit-container">
+                    <img src="logo.png" alt="Infinity Loop Logo" class="logo-image">
+                    <div class="orbit">
+                        <div class="satellite"></div>
+                    </div>
+                </div>
+                <div class="logo-text">
+                    <span class="glitch-text">Infinityloop</span>
+                </div>
+                <span class="subtitle">simple websites and applications</span>
+            </div>
+            <div class="score-container">
+                <span class="neon-text">Score: <span id="score">0</span></span>
+                <br>
+                <span class="neon-text">High Score: <span id="highScore">0</span></span>
+            </div>
+        </nav>
+        
+        <div class="game-container">
+            <div id="player" class="player"></div>
+        </div>
+
+        <div class="glass-container game-menu">
+            <div class="scanner-line"></div>
+            <h1 class="cyber-glitch">Cosmic Collector</h1>
+            <p class="neon-text">Collect cosmic elements, avoid obstacles</p>
+            <p class="neon-text instructions">Use arrow keys or WASD to move</p>
+            <button class="cta-button" id="startGame">
+                <span class="btn-glitch">Initialize Game</span>
+                <div class="btn-scanner"></div>
+            </button>
+        </div>
+
+        <div class="glass-container game-over hidden">
+            <div class="scanner-line"></div>
+            <h2 class="cyber-glitch">Game Over</h2>
+            <p class="neon-text">Final Score: <span id="finalScore">0</span></p>
+            <p class="neon-text">High Score: <span id="finalHighScore">0</span></p>
+            <p class="new-record neon-text hidden">New Record! 🏆</p>
+            <button class="cta-button" id="restartGame">
+                <span class="btn-glitch">Restart Mission</span>
+                <div class="btn-scanner"></div>
+            </button>
+        </div>
+    </div>
+    <script src="sounds.js"></script>
+    <script src="game.js"></script>
+    <div class="power-up-indicator hidden">
+        <span class="power-up-name"></span>
+        <div class="power-up-timer"></div>
+    </div>
+</body>
+</html>
