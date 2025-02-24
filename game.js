@@ -64,9 +64,31 @@ class Game {
             this.gameOver.classList.add('hidden');
             this.startGame();
         });
+        
+        // Keyboard controls
         document.addEventListener('keydown', (e) => this.handleKeyDown(e));
         document.addEventListener('keyup', (e) => this.handleKeyUp(e));
         document.addEventListener('keypress', (e) => this.handleKeyPress(e));
+        
+        // Touch controls
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+        this.isTouching = false;
+        
+        this.gameContainer.addEventListener('touchstart', (e) => this.handleTouchStart(e));
+        this.gameContainer.addEventListener('touchmove', (e) => this.handleTouchMove(e));
+        this.gameContainer.addEventListener('touchend', () => this.handleTouchEnd());
+        
+        // Shoot button for mobile
+        const shootButton = document.createElement('button');
+        shootButton.className = 'mobile-shoot-button';
+        shootButton.textContent = '🔫';
+        this.gameContainer.appendChild(shootButton);
+        
+        shootButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (this.isPlaying) this.shoot();
+        });
     }
     
     handleKeyPress(e) {
@@ -182,6 +204,38 @@ class Game {
     handleKeyUp(e) {
         if (!this.isPlaying) return;
         this.keysPressed.delete(e.key.toLowerCase());
+    }
+    
+    handleTouchStart(e) {
+        if (!this.isPlaying) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        this.touchStartX = touch.clientX;
+        this.touchStartY = touch.clientY;
+        this.isTouching = true;
+    }
+    
+    handleTouchMove(e) {
+        if (!this.isPlaying || !this.isTouching) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        
+        // Vypočítáme směr pohybu
+        const deltaX = touch.clientX - this.touchStartX;
+        const deltaY = touch.clientY - this.touchStartY;
+        
+        // Aktualizujeme směr lodi
+        const angle = Math.atan2(deltaX, -deltaY) * 180 / Math.PI;
+        this.direction = angle;
+        
+        // Pokud je prst dostatečně daleko od počátečního bodu, aktivujeme tah
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        this.isThrusting = distance > 20;
+    }
+    
+    handleTouchEnd() {
+        this.isTouching = false;
+        this.isThrusting = false;
     }
 
     createExplosion(x, y) {

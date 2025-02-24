@@ -882,6 +882,32 @@ nav {
     75% { transform: skewX(-15deg); text-shadow: 2px 0 var(--primary-color), 0 0 20px var(--primary-color); }
 }
 
+.mobile-shoot-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid var(--primary-color);
+    border-radius: 50%;
+    font-size: 24px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    box-shadow: 0 0 15px var(--primary-color);
+}
+
+@media (max-width: 768px) {
+    .mobile-shoot-button {
+        display: flex;
+    }
+}
+
 @keyframes neon-pulse {
     0%, 100% { opacity: 0.8; text-shadow: 0 0 10px var(--accent-color); }
     50% { opacity: 1; text-shadow: 0 0 20px var(--accent-color); }
