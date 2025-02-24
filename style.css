@@ -882,6 +882,97 @@ nav {
     75% { transform: skewX(-15deg); text-shadow: 2px 0 var(--primary-color), 0 0 20px var(--primary-color); }
 }
 
+/* Mobilní ovládací prvky */
+.thrust-indicator {
+    position: absolute;
+    pointer-events: none;
+    width: 100px;
+    height: 100px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    display: none;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+}
+
+.thrust-indicator.active {
+    display: block;
+    animation: pulse 1s infinite;
+}
+
+.thrust-indicator::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 20px solid rgba(255, 255, 255, 0.7);
+    transform: translate(-50%, -50%);
+}
+
+.mobile-shoot-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    color: white;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-shoot-button:active {
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(0.95);
+}
+
+@keyframes pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+    }
+}
+
+/* Responzivní design pro mobilní zařízení */
+@media (max-width: 768px) {
+    .game-container {
+        touch-action: none;
+    }
+    
+    .game-menu, .game-over {
+        padding: 20px;
+        font-size: 14px;
+    }
+    
+    button {
+        padding: 12px 24px;
+        font-size: 16px;
+    }
+    
+    #score {
+        font-size: 24px;
+    }
+}
+
 .mobile-shoot-button {
     position: fixed;
     bottom: 20px;

@@ -1,5 +1,10 @@
 class Game {
     constructor() {
+        // Nastavení pro mobilní zařízení
+        this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        this.sensitivity = 1.0; // Výchozí citlivost
+        this.lastTap = null; // Pro detekci double-tap
+        this.thrustIndicator = null; // Pro vizuální indikátor tahu
         this.player = document.getElementById('player');
         this.gameContainer = document.querySelector('.game-container');
         this.gameMenu = document.querySelector('.game-menu');
@@ -59,6 +64,15 @@ class Game {
     }
     
     init() {
+        // Vytvoření indikátoru tahu
+        this.thrustIndicator = document.createElement('div');
+        this.thrustIndicator.className = 'thrust-indicator';
+        this.gameContainer.appendChild(this.thrustIndicator);
+        
+        // Přidání ovládacích prvků pro mobilní zařízení
+        if (this.isMobile) {
+            this.createMobileControls();
+        }
         this.startButton.addEventListener('click', () => this.startGame());
         this.restartButton.addEventListener('click', () => {
             this.gameOver.classList.add('hidden');
@@ -213,6 +227,20 @@ class Game {
         this.touchStartX = touch.clientX;
         this.touchStartY = touch.clientY;
         this.isTouching = true;
+        
+        // Detekce double-tap pro rychlou střelbu
+        const now = Date.now();
+        if (this.lastTap && (now - this.lastTap) < 300) {
+            this.shoot();
+            this.lastTap = null;
+        } else {
+            this.lastTap = now;
+        }
+        
+        // Vibrační odezva při dotyku
+        if (navigator.vibrate) {
+            navigator.vibrate(50);
+        }
     }
     
     handleTouchMove(e) {
@@ -220,22 +248,78 @@ class Game {
         e.preventDefault();
         const touch = e.touches[0];
         
-        // Vypočítáme směr pohybu
+        // Vypočítáme směr pohybu s kalibrovanou citlivostí
         const deltaX = touch.clientX - this.touchStartX;
         const deltaY = touch.clientY - this.touchStartY;
         
-        // Aktualizujeme směr lodi
-        const angle = Math.atan2(deltaX, -deltaY) * 180 / Math.PI;
-        this.direction = angle;
+        // Aktualizujeme směr lodi s plynulejší rotací
+        const targetAngle = Math.atan2(deltaX, -deltaY) * 180 / Math.PI;
+        const angleDiff = targetAngle - this.direction;
         
-        // Pokud je prst dostatečně daleko od počátečního bodu, aktivujeme tah
+        // Plynulá rotace
+        if (Math.abs(angleDiff) > 180) {
+            if (angleDiff > 0) {
+                this.direction += (angleDiff - 360) * 0.1;
+            } else {
+                this.direction += (angleDiff + 360) * 0.1;
+            }
+        } else {
+            this.direction += angleDiff * 0.1;
+        }
+        
+        // Normalizace úhlu
+        this.direction = ((this.direction % 360) + 360) % 360;
+        
+        // Adaptivní práh pro aktivaci tahu
         const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-        this.isThrusting = distance > 20;
+        const threshold = window.innerWidth * 0.05; // 5% šířky obrazovky
+        this.isThrusting = distance > threshold;
+        
+        // Vizuální indikátor směru
+        this.updateThrustIndicator(distance > threshold, this.direction);
     }
     
     handleTouchEnd() {
         this.isTouching = false;
         this.isThrusting = false;
+        this.thrustIndicator.classList.remove('active');
+    }
+
+    createMobileControls() {
+        // Vytvoření tlačítka pro střelbu
+        const shootButton = document.createElement('button');
+        shootButton.className = 'mobile-shoot-button';
+        shootButton.textContent = '🔫';
+        this.gameContainer.appendChild(shootButton);
+
+        // Přidání událostí pro tlačítko střelby
+        shootButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (this.isPlaying && this.canShoot) {
+                this.shoot();
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+            }
+        });
+
+        // Zamezení výchozímu chování prohlížeče
+        this.gameContainer.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+    }
+
+    updateThrustIndicator(isActive, angle) {
+        if (!this.thrustIndicator) return;
+
+        if (isActive) {
+            this.thrustIndicator.classList.add('active');
+            this.thrustIndicator.style.left = this.touchStartX + 'px';
+            this.thrustIndicator.style.top = this.touchStartY + 'px';
+            this.thrustIndicator.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+        } else {
+            this.thrustIndicator.classList.remove('active');
+        }
     }
 
     createExplosion(x, y) {
