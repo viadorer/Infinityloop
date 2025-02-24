@@ -73,6 +73,7 @@ class Game {
         if (this.isMobile) {
             this.createMobileControls();
         }
+        
         this.startButton.addEventListener('click', () => this.startGame());
         this.restartButton.addEventListener('click', () => {
             this.gameOver.classList.add('hidden');
@@ -88,16 +89,13 @@ class Game {
         this.touchStartX = 0;
         this.touchStartY = 0;
         this.isTouching = false;
+        this.lastTouchX = 0;
+        this.lastTouchY = 0;
         
+        // Přidání touch event listenerů
         this.gameContainer.addEventListener('touchstart', (e) => this.handleTouchStart(e));
         this.gameContainer.addEventListener('touchmove', (e) => this.handleTouchMove(e));
         this.gameContainer.addEventListener('touchend', () => this.handleTouchEnd());
-        
-        // Shoot button for mobile
-        const shootButton = document.createElement('button');
-        shootButton.className = 'mobile-shoot-button';
-        shootButton.textContent = '🔫';
-        this.gameContainer.appendChild(shootButton);
         
         shootButton.addEventListener('touchstart', (e) => {
             e.preventDefault();
@@ -275,8 +273,31 @@ class Game {
         const threshold = window.innerWidth * 0.05; // 5% šířky obrazovky
         this.isThrusting = distance > threshold;
         
+        // Aktualizace rychlosti a pozice
+        if (this.isThrusting) {
+            this.speed = Math.min(this.speed + this.acceleration, this.maxSpeed);
+        } else {
+            this.speed *= this.deceleration;
+        }
+        
+        // Aktualizace pozice hráče
+        const radians = this.direction * Math.PI / 180;
+        this.playerPos.x += Math.sin(radians) * this.speed;
+        this.playerPos.y -= Math.cos(radians) * this.speed;
+        
+        // Omezení pohybu na hranice obrazovky
+        this.playerPos.x = Math.max(0, Math.min(window.innerWidth, this.playerPos.x));
+        this.playerPos.y = Math.max(0, Math.min(window.innerHeight, this.playerPos.y));
+        
+        // Aktualizace pozice hráče na obrazovce
+        this.player.style.transform = `translate(${this.playerPos.x}px, ${this.playerPos.y}px) rotate(${this.direction}deg)`;
+        
         // Vizuální indikátor směru
-        this.updateThrustIndicator(distance > threshold, this.direction);
+        this.updateThrustIndicator(this.isThrusting, this.direction);
+        
+        // Uložení poslední pozice dotyku
+        this.lastTouchX = touch.clientX;
+        this.lastTouchY = touch.clientY;
     }
     
     handleTouchEnd() {
@@ -293,20 +314,28 @@ class Game {
         this.gameContainer.appendChild(shootButton);
 
         // Přidání událostí pro tlačítko střelby
-        shootButton.addEventListener('touchstart', (e) => {
+        const handleShoot = (e) => {
             e.preventDefault();
+            e.stopPropagation();
             if (this.isPlaying && this.canShoot) {
                 this.shoot();
                 if (navigator.vibrate) {
                     navigator.vibrate(50);
                 }
             }
-        });
+        };
+
+        shootButton.addEventListener('touchstart', handleShoot);
+        shootButton.addEventListener('mousedown', handleShoot);
 
         // Zamezení výchozímu chování prohlížeče
         this.gameContainer.addEventListener('touchmove', (e) => {
             e.preventDefault();
         }, { passive: false });
+
+        // Nastavení emoji jako hráče
+        this.player.textContent = '🚀';
+        this.player.style.fontSize = '32px';
     }
 
     updateThrustIndicator(isActive, angle) {
