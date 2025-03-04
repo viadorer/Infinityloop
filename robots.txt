@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://viadorer.github.io/Infinityloop/sitemap.xml
